@@ -1,8 +1,8 @@
 {
-  "id": "obsidian-todoist-sync",
+  "id": "todoist-sync",
   "name": "Todoist Sync",
   "version": "1.0.0",
-  "minAppVersion": "1.0.0",
+  "minAppVersion": "1.4.0",
   "description": "Sync tasks from Obsidian to Todoist with completion status synced back",
   "author": "Miana Ella Winter",
   "authorUrl": "https://github.com/NiamhAstra",

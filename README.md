@@ -2,6 +2,8 @@
 
 Sync tasks between Obsidian and Todoist. Push new tasks to Todoist, pull completion status back to Obsidian.
 
+> **Note:** This plugin was a one-day build made primarily for my wife to use. Feature requests and additional development beyond keeping it functional will likely be slow or non-existent. Contributions are welcome!
+
 ## Features
 
 - **One-command sync** - Single "Sync with Todoist" command handles both push and pull
@@ -99,6 +101,10 @@ Obsidian is the source of truth for task content. Todoist is the source of truth
 - One-way content sync (Obsidian → Todoist). Completion syncs back.
 - Requires at least one tag mapping to sync tasks
 - Wiki links are stripped from task titles when sent to Todoist
+
+## Privacy & Network
+
+This plugin communicates with the Todoist REST API (api.todoist.com) to sync tasks. Your API token is stored locally in Obsidian's plugin data and is only sent to Todoist servers. No other data is collected or transmitted.
 
 ## Development
 
