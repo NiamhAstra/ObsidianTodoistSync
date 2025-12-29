@@ -1,4 +1,4 @@
-import { Notice, Plugin, TFile } from "obsidian";
+import { Notice, Plugin } from "obsidian";
 import { DEFAULT_SETTINGS, Settings } from "./models/types";
 import { TodoistSyncSettingTab } from "./settings/SettingsTab";
 import { TodoistClient } from "./todoist/TodoistClient";
