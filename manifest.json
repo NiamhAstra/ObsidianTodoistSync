@@ -1,0 +1,9 @@
+{
+  "id": "obsidian-todoist-sync",
+  "name": "Todoist Sync",
+  "version": "1.0.0",
+  "minAppVersion": "1.0.0",
+  "description": "Sync tasks from Obsidian to Todoist with completion status synced back",
+  "author": "",
+  "isDesktopOnly": false
+}
