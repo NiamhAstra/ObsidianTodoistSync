@@ -45,6 +45,99 @@ describe("TodoistClient", () => {
     });
   });
 
+  describe("task operations", () => {
+    describe("getTask", () => {
+      it("should fetch a single task by ID", async () => {
+        const mockTask = { id: "task-123", content: "Test task", is_completed: false };
+        (global.fetch as any).mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockTask,
+        });
+
+        const result = await client.getTask("task-123");
+
+        expect(global.fetch).toHaveBeenCalledWith(
+          "https://api.todoist.com/rest/v2/tasks/task-123",
+          expect.any(Object)
+        );
+        expect(result).toEqual(mockTask);
+      });
+
+      it("should return null for 404", async () => {
+        (global.fetch as any).mockResolvedValueOnce({ ok: false, status: 404 });
+
+        const result = await client.getTask("nonexistent");
+
+        expect(result).toBeNull();
+      });
+    });
+
+    describe("createTask", () => {
+      it("should create a task with correct payload", async () => {
+        const mockTask = { id: "new-123", content: "New task" };
+        (global.fetch as any).mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockTask,
+        });
+
+        const result = await client.createTask({
+          content: "New task",
+          project_id: "proj-123",
+          priority: 1,
+          due_date: "2024-01-15",
+        });
+
+        expect(global.fetch).toHaveBeenCalledWith(
+          "https://api.todoist.com/rest/v2/tasks",
+          expect.objectContaining({
+            method: "POST",
+            body: JSON.stringify({
+              content: "New task",
+              project_id: "proj-123",
+              priority: 1,
+              due_date: "2024-01-15",
+            }),
+          })
+        );
+        expect(result).toEqual(mockTask);
+      });
+    });
+
+    describe("updateTask", () => {
+      it("should update a task", async () => {
+        const mockTask = { id: "task-123", content: "Updated" };
+        (global.fetch as any).mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockTask,
+        });
+
+        const result = await client.updateTask("task-123", { content: "Updated" });
+
+        expect(global.fetch).toHaveBeenCalledWith(
+          "https://api.todoist.com/rest/v2/tasks/task-123",
+          expect.objectContaining({
+            method: "POST",
+            body: JSON.stringify({ content: "Updated" }),
+          })
+        );
+        expect(result).toEqual(mockTask);
+      });
+    });
+
+    describe("closeTask", () => {
+      it("should close a task", async () => {
+        (global.fetch as any).mockResolvedValueOnce({ ok: true });
+
+        await client.closeTask("task-123");
+
+        expect(global.fetch).toHaveBeenCalledWith(
+          "https://api.todoist.com/rest/v2/tasks/task-123/close",
+          expect.objectContaining({ method: "POST" })
+        );
+      });
+    });
+  });
+
   describe("retry logic", () => {
     it("should retry on 429 with exponential backoff", async () => {
       const mockProjects = [{ id: "123", name: "Work" }];
