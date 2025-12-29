@@ -21,15 +21,16 @@ export class TodoistSyncSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("API Token")
       .setDesc("Your Todoist API token (Settings → Integrations → Developer)")
-      .addText((text) =>
+      .addText((text) => {
         text
           .setPlaceholder("Enter your API token")
           .setValue(this.plugin.settings.apiToken)
           .onChange(async (value) => {
             this.plugin.settings.apiToken = value;
             await this.plugin.saveSettings();
-          })
-      )
+          });
+        text.inputEl.type = "password";
+      })
       .addButton((button) =>
         button.setButtonText("Test Connection").onClick(async () => {
           await this.testConnection();
@@ -62,7 +63,7 @@ export class TodoistSyncSettingTab extends PluginSettingTab {
     container.empty();
 
     this.plugin.settings.tagMappings.forEach((mapping, index) => {
-      const setting = new Setting(container)
+      new Setting(container)
         .addText((text) =>
           text
             .setPlaceholder("#tag")
@@ -111,6 +112,7 @@ export class TodoistSyncSettingTab extends PluginSettingTab {
       this.plugin.showNotice(`Connected! Found ${this.projects.length} projects`);
       this.display();
     } catch (error) {
+      console.error("Todoist connection test failed:", error);
       this.plugin.showNotice("Connection failed. Check your API token.");
     }
   }
