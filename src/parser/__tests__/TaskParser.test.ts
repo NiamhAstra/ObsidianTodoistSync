@@ -109,4 +109,42 @@ describe("TaskParser", () => {
       });
     });
   });
+
+  describe("parseContent", () => {
+    it("should parse all tasks from content", () => {
+      const content = `# My Tasks
+
+- [ ] Task one #work
+- [x] Completed task
+- [ ] Task two 📅 2024-01-15
+
+Some text here
+
+- [ ] Task three`;
+
+      const results = parser.parseContent(content);
+
+      expect(results).toHaveLength(4);
+      expect(results[0].title).toBe("Task one");
+      expect(results[0].lineNumber).toBe(2);
+      expect(results[1].isCompleted).toBe(true);
+      expect(results[2].dueDate).toBe("2024-01-15");
+      expect(results[3].lineNumber).toBe(8);
+    });
+
+    it("should build parent-child relationships", () => {
+      const content = `- [ ] Parent #work
+    - [ ] Child one
+    - [ ] Child two
+        - [ ] Grandchild`;
+
+      const results = parser.parseContent(content);
+
+      expect(results).toHaveLength(4);
+      expect(results[0].indentLevel).toBe(0);
+      expect(results[1].indentLevel).toBe(1);
+      expect(results[2].indentLevel).toBe(1);
+      expect(results[3].indentLevel).toBe(2);
+    });
+  });
 });

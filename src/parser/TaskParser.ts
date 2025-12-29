@@ -18,6 +18,20 @@ export class TaskParser {
     "⏬": 4,
   };
 
+  parseContent(content: string): ParsedTask[] {
+    const lines = content.split("\n");
+    const tasks: ParsedTask[] = [];
+
+    for (let i = 0; i < lines.length; i++) {
+      const task = this.parseLine(lines[i], i);
+      if (task) {
+        tasks.push(task);
+      }
+    }
+
+    return tasks;
+  }
+
   parseLine(line: string, lineNumber: number): ParsedTask | null {
     const match = line.match(this.TASK_REGEX);
     if (!match) {
