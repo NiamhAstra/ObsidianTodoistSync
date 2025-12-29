@@ -1,6 +1,11 @@
 import { TodoistProject } from "../models/types";
 
 const BASE_URL = "https://api.todoist.com/rest/v2";
+const MAX_RETRIES = 3;
+const INITIAL_DELAY_MS = 1000;
+const BACKOFF_MULTIPLIER = 2;
+
+const RETRYABLE_STATUS_CODES = [429, 500, 502, 503];
 
 export class TodoistClient {
   constructor(private apiToken: string) {}
@@ -12,15 +17,44 @@ export class TodoistClient {
     };
   }
 
+  private async delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  private async fetchWithRetry(
+    url: string,
+    options: RequestInit
+  ): Promise<Response> {
+    let lastError: Error | null = null;
+    let delayMs = INITIAL_DELAY_MS;
+
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      const response = await fetch(url, options);
+
+      if (response.ok) {
+        return response;
+      }
+
+      if (!RETRYABLE_STATUS_CODES.includes(response.status)) {
+        throw new Error(`Request failed: ${response.status}`);
+      }
+
+      lastError = new Error(`Request failed: ${response.status}`);
+
+      if (attempt < MAX_RETRIES - 1) {
+        await this.delay(delayMs);
+        delayMs *= BACKOFF_MULTIPLIER;
+      }
+    }
+
+    throw new Error("Max retries exceeded");
+  }
+
   async getProjects(): Promise<TodoistProject[]> {
-    const response = await fetch(`${BASE_URL}/projects`, {
+    const response = await this.fetchWithRetry(`${BASE_URL}/projects`, {
       method: "GET",
       headers: this.headers,
     });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch projects: ${response.status}`);
-    }
 
     return response.json();
   }
