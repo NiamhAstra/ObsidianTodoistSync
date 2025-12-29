@@ -1,3 +1,8 @@
+/**
+ * Obsidian Todoist Sync Plugin
+ * Syncs tasks from Obsidian to Todoist with completion status synced back.
+ */
+
 import { Notice, Plugin } from "obsidian";
 import { DEFAULT_SETTINGS, Settings } from "./models/types";
 import { TodoistSyncSettingTab } from "./settings/SettingsTab";
@@ -8,6 +13,10 @@ import { PullService } from "./sync/PullService";
 import { PushService } from "./sync/PushService";
 import { SyncEngine } from "./sync/SyncEngine";
 
+/**
+ * Main plugin class.
+ * Registers the sync command and settings tab.
+ */
 export default class TodoistSyncPlugin extends Plugin {
   settings: Settings = DEFAULT_SETTINGS;
 
@@ -33,10 +42,18 @@ export default class TodoistSyncPlugin extends Plugin {
     await this.saveData(this.settings);
   }
 
+  /**
+   * Shows a notification to the user.
+   * @param message - Text to display
+   */
   showNotice(message: string) {
     new Notice(message);
   }
 
+  /**
+   * Syncs the currently active file with Todoist.
+   * Validates configuration before running sync.
+   */
   private async syncCurrentFile() {
     const activeFile = this.app.workspace.getActiveFile();
     if (!activeFile) {
@@ -57,6 +74,7 @@ export default class TodoistSyncPlugin extends Plugin {
     try {
       const content = await this.app.vault.read(activeFile);
 
+      // Build the sync pipeline
       const client = new TodoistClient(this.settings.apiToken);
       const parser = new TaskParser();
       const formatter = new TaskFormatter();
@@ -67,6 +85,7 @@ export default class TodoistSyncPlugin extends Plugin {
 
       const result = await syncEngine.sync(content);
 
+      // Write updated content back to file
       await this.app.vault.modify(activeFile, result.content);
 
       this.showSyncResult(result);
@@ -77,6 +96,7 @@ export default class TodoistSyncPlugin extends Plugin {
     }
   }
 
+  // Formats sync results into a user-friendly notification
   private showSyncResult(result: {
     created: number;
     updated: number;
@@ -105,6 +125,7 @@ export default class TodoistSyncPlugin extends Plugin {
 
     let message = `Synced with Todoist\n• ${parts.join("\n• ")}`;
 
+    // Show first 3 errors for debugging without overwhelming the user
     if (result.errors.length > 0) {
       const errorDetails = result.errors
         .slice(0, 3)

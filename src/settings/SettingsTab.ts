@@ -1,10 +1,20 @@
+/**
+ * Settings UI for the Todoist Sync plugin.
+ * Allows users to configure API token and tag-to-project mappings.
+ */
+
 import { App, PluginSettingTab, Setting } from "obsidian";
 import TodoistSyncPlugin from "../main";
 import { TodoistClient } from "../todoist/TodoistClient";
 import { TodoistProject } from "../models/types";
 
+/**
+ * Obsidian settings tab for plugin configuration.
+ * Fetches projects from Todoist to populate mapping dropdowns.
+ */
 export class TodoistSyncSettingTab extends PluginSettingTab {
   plugin: TodoistSyncPlugin;
+  // Populated after successful connection test
   projects: TodoistProject[] = [];
 
   constructor(app: App, plugin: TodoistSyncPlugin) {
@@ -18,6 +28,7 @@ export class TodoistSyncSettingTab extends PluginSettingTab {
 
     containerEl.createEl("h2", { text: "Todoist Sync Settings" });
 
+    // API token input with password masking for security
     new Setting(containerEl)
       .setName("API Token")
       .setDesc("Your Todoist API token (Settings → Integrations → Developer)")
@@ -59,6 +70,7 @@ export class TodoistSyncSettingTab extends PluginSettingTab {
     );
   }
 
+  // Renders tag-to-project mapping rows with edit/delete controls
   private renderMappings(container: HTMLElement): void {
     container.empty();
 
@@ -69,6 +81,7 @@ export class TodoistSyncSettingTab extends PluginSettingTab {
             .setPlaceholder("#tag")
             .setValue(mapping.tag)
             .onChange(async (value) => {
+              // Auto-prefix with # if missing
               this.plugin.settings.tagMappings[index].tag = value.startsWith("#")
                 ? value
                 : `#${value}`;
@@ -99,6 +112,10 @@ export class TodoistSyncSettingTab extends PluginSettingTab {
     });
   }
 
+  /**
+   * Tests the API token by fetching projects.
+   * Populates project dropdown on success for mapping configuration.
+   */
   private async testConnection(): Promise<void> {
     const token = this.plugin.settings.apiToken;
     if (!token) {
@@ -110,6 +127,7 @@ export class TodoistSyncSettingTab extends PluginSettingTab {
       const client = new TodoistClient(token);
       this.projects = await client.getProjects();
       this.plugin.showNotice(`Connected! Found ${this.projects.length} projects`);
+      // Refresh to show projects in dropdowns
       this.display();
     } catch (error) {
       console.error("Todoist connection test failed:", error);
