@@ -25,11 +25,18 @@ jobs:
           npm install
           npm run build
 
+      - name: Verify build outputs
+        run: |
+          ls -la main.js manifest.json
+
       - name: Create release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           tag="${GITHUB_REF#refs/tags/}"
+
+          # Delete existing release if it exists (from failed attempts)
+          gh release delete "$tag" --yes 2>/dev/null || true
 
           gh release create "$tag" \
             --title="$tag" \
