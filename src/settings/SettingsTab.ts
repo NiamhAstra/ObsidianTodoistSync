@@ -26,6 +26,9 @@ export class TodoistSyncSettingTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
 
+    // Load cached projects from settings
+    this.projects = this.plugin.settings.cachedProjects;
+
     containerEl.createEl("h2", { text: "Todoist Sync Settings" });
 
     // API token input with password masking for security
@@ -43,8 +46,8 @@ export class TodoistSyncSettingTab extends PluginSettingTab {
         text.inputEl.type = "password";
       })
       .addButton((button) =>
-        button.setButtonText("Test Connection").onClick(async () => {
-          await this.testConnection();
+        button.setButtonText("Refresh Projects").onClick(async () => {
+          await this.refreshProjects();
         })
       );
 
@@ -113,10 +116,10 @@ export class TodoistSyncSettingTab extends PluginSettingTab {
   }
 
   /**
-   * Tests the API token by fetching projects.
-   * Populates project dropdown on success for mapping configuration.
+   * Fetches projects from Todoist and caches them.
+   * Populates project dropdown for mapping configuration.
    */
-  private async testConnection(): Promise<void> {
+  private async refreshProjects(): Promise<void> {
     const token = this.plugin.settings.apiToken;
     if (!token) {
       this.plugin.showNotice("Please enter an API token first");
@@ -126,11 +129,16 @@ export class TodoistSyncSettingTab extends PluginSettingTab {
     try {
       const client = new TodoistClient(token);
       this.projects = await client.getProjects();
+
+      // Cache projects in settings
+      this.plugin.settings.cachedProjects = this.projects;
+      await this.plugin.saveSettings();
+
       this.plugin.showNotice(`Connected! Found ${this.projects.length} projects`);
       // Refresh to show projects in dropdowns
       this.display();
     } catch (error) {
-      console.error("Todoist connection test failed:", error);
+      console.error("Todoist project fetch failed:", error);
       this.plugin.showNotice("Connection failed. Check your API token.");
     }
   }

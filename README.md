@@ -32,7 +32,7 @@ Sync tasks between Obsidian and Todoist. Push new tasks to Todoist, pull complet
 
 1. Get your Todoist API token from [Todoist Settings → Integrations → Developer](https://todoist.com/app/settings/integrations/developer)
 2. Open Obsidian Settings → Todoist Sync
-3. Paste your API token and click "Test Connection"
+3. Paste your API token and click "Refresh Projects"
 4. Add tag mappings to route tasks to Todoist projects:
    - Tag: `#work` → Project: Work
    - Tag: `#personal` → Project: Personal

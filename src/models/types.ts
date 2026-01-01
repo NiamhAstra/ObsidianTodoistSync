@@ -58,11 +58,13 @@ export interface TagMapping {
 export interface Settings {
   apiToken: string;
   tagMappings: TagMapping[];
+  cachedProjects: TodoistProject[];
 }
 
 export const DEFAULT_SETTINGS: Settings = {
   apiToken: "",
   tagMappings: [],
+  cachedProjects: [],
 };
 
 /**
